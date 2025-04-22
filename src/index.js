@@ -1,6 +1,5 @@
 //Global Variables
 const gameContainer = document.querySelector(".game-container");
-const audio = document.querySelector("#music");
 
 function CreateBoard(dimension = 600, division = 11, difficulty = 10) {
     const gameBoard = document.createElement("div");
@@ -30,8 +29,6 @@ function CreateBoard(dimension = 600, division = 11, difficulty = 10) {
             //Bomb or no...
             if (Math.floor(Math.random()*100) <= difficulty) {
                 newCell.setAttribute("data-status", "bomb");
-
-                newCell.style.backgroundColor = "red";
             } else {
                 newCell.setAttribute("data-status", "clear");
             }
@@ -74,13 +71,44 @@ function CheckSurroundings(coord, cellList) {
     return bombsTouched;
 }
 
+function clearZeroes(cellList) {
+    cellList.forEach((cell) => {
+        if (cell.getAttribute("data-status") != "bomb") {
+            const bombsTouched = CheckSurroundings(cell.getAttribute("data-coord").split(",").map((value) => Number(value)), cellList);
+
+            if (bombsTouched === 0) {
+                cell.classList = "dug";
+            }
+        }
+    })
+}
+
+function playSFX(type = "dig") {
+    const shovelSfx = [
+        new Audio("../resources/digging1_sfx.mp3"),
+        new Audio("../resources/digging2_sfx.mp3"),
+        new Audio("../resources/digging3_sfx.mp3"),
+    ];
+
+    const bombSfx = [
+
+    ];
+
+    if (type === "dig") {
+        shovelSfx[Math.floor(Math.random()*(shovelSfx.length))].play();
+    } else {
+        shovelSfx[Math.floor(Math.random()*(shovelSfx.length))].play();
+    }
+}
 
 
-const gameComponents = CreateBoard(600, 13, 25);
+
+const gameComponents = CreateBoard(600, 13, 10);
 const cellList = gameComponents.cellList;
+clearZeroes(cellList);
 
 gameComponents.gameBoard.addEventListener("click", (event) => {
-    if (event.target.classList === "dug") {
+    if (event.target.classList == "dug") {
         return;
     }
 
@@ -91,6 +119,7 @@ gameComponents.gameBoard.addEventListener("click", (event) => {
 
         event.target.classList = "dug";
         event.target.innerHTML = `${bombsTouched}`;
+        playSFX();
     } else {
         console.log("BOMB!");
 
